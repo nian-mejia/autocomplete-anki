@@ -1,4 +1,3 @@
-import main
 from googletrans import Translator
 from deep_translator import GoogleTranslator
 
@@ -33,10 +32,15 @@ def do_translat(translator, word):
     else:
         dest = "en"
     
-    translated = translator(source=language, target=dest).translate(word)
-    return translated
+    try:
+        translated = translator(source=language, target=dest).translate(word)
+        return translated
+    except:
+        print("error")
+        return "error"
 
 def googletrans(word):
     translated = do_translat(GoogleTranslator, word)
+    print(translated.capitalize())
     return translated.capitalize()
 

@@ -1,9 +1,9 @@
-import main
 import time
 import boto3
 import time
 import yaml
 from boto3.session import Session
+
 
 with open(r'aws_key.yaml') as file_aws:
     lista_aws = yaml.full_load(file_aws)
@@ -16,7 +16,7 @@ def delete(my_bucket, name_file):
     return respuesta
 
 
-def status():
+def status(id,name):
     statu = {'scheduled': "en peticion", 'inProgress': "en proceso",
              'completed': "generado", 'failed': "fallido"}
 
@@ -25,7 +25,7 @@ def status():
     while estado != generado:
         try:
             polly_client = cliente()
-            task_status = polly_client.get_speech_synthesis_task(TaskId=taskId)
+            task_status = polly_client.get_speech_synthesis_task(TaskId=id)
             s = task_status["SynthesisTask"]["TaskStatus"]
             estado = statu[s]
             if estado == generado:
@@ -35,11 +35,15 @@ def status():
             print("Audio no encontrado")
 
     if estado == generado:
-        global word
-        descargar()
+        id = id + ".mp3"
+        word = name.replace(" ", "_") + ".mp3"
+        descargar(id, word)
         s3 = sessionS3()
         my_bucket = s3.Bucket(lista_aws["buckets"])
-        delete(my_bucket, taskId + ".mp3")
+        delete(my_bucket, id)
+    
+    
+    return name+"[sound:"+word+"]"
 
 
 def cliente():
@@ -57,11 +61,20 @@ def sessionS3():
     s3 = session.resource('s3')
     return s3
 
+def descargar(id, word):
+    s3 = sessionS3()
+    my_bucket = s3.Bucket(lista_aws["buckets"])
+
+    print("Descargando elemento...")
+
+    my_bucket.download_file(id, "{}{}".format(
+        lista_aws["root"], word))
+    print("Descarga completada")
 
 def polly_tarea(word_input):
-    global word
     word = word_input
     polly_client = cliente()
+    #help(polly_client)
 
     response = polly_client.start_speech_synthesis_task(
         Engine='neural',
@@ -72,32 +85,12 @@ def polly_tarea(word_input):
         VoiceId='Salli',
         Text=word)
 
-    global taskId
     taskId = response['SynthesisTask']['TaskId']
 
-    word = word.replace(" ", "_") + ".mp3"
-
     print("Task id is {} ".format(taskId))
-    status()
-    return word + ".mp3"
+    # status()
+    # return word.replace(".mp3","")+"[sound:"+word+"]"
+    return taskId
 
 
-def descargar():
-    global word
 
-    s3 = sessionS3()
-    my_bucket = s3.Bucket(lista_aws["buckets"])
-
-    print("Descargando elemento...")
-
-    my_bucket.download_file(taskId + ".mp3", "{}{}".format(
-        lista_aws["root"], word))
-    print("Descarga completada")
-
-
-def solicitud():
-    global word
-    word = str(input("Ingresa una palabra/oración: ")).lower()
-    if not word:
-        solicitud()
-    return word

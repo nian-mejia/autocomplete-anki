@@ -1,49 +1,22 @@
+import pandas as pd 
 import ipa
 import translator
 import polly
 
-
-choise = """
-[1] IPA
-[2] Traductor
-[3] Definición
-[4] Audio
-[5] Todo
-[9] Salir
-    
-Ingresa un número: """
-
-
-def inicio():
-    pagina = str(input(choise))
-
-    if pagina == "1":
-        print("IPA")
-        ipa.run()
-
-    elif pagina == "2":
-        print("Traductor")
-        translator.run()
-
-    elif pagina == "3":
-        print("Definición")
-        inicio()
-
-    elif pagina == "4":
-        print("Audio")
-        polly.run()
-
-    elif pagina == "5":
-        print("Todo")
-        inicio()
-
-    elif pagina == "9":
-        print("Salir")
-        exit()
-    else:
-        print("Ingresa una opción correcta")
-        inicio()
-
-
 if __name__ == "__main__":
-    inicio()
+    words = pd.read_csv("words_anki.csv")
+    words.columns = ["word"]
+    words["word"] = words["word"].apply(lambda x: x.lower())
+    words["word"].str.strip()
+    #words = words_no_clean["word"].drop_duplicates()
+    print(words.size)
+    words["ipa"] = words["word"].apply(ipa.ipa_cmu)
+    print("IPAS is ready now")
+    words["translate"] = words["word"].apply(translator.googletrans)
+    print("Translate is ready now")
+    words["taskid"] = words["word"].apply(polly.polly_tarea)
+    words["word"] = words["taskid"].apply(lambda x: polly.status(x, words["word"]))
+    print("Sound is ready now")
+    words.drop(["taskid"], axis=1)
+    words = words[["word", "translate", "ipa"]]
+    words.to_csv('data_clean.csv', index=False)
