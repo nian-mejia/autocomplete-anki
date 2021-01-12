@@ -15,8 +15,7 @@ if __name__ == "__main__":
     words["translate"] = words["word"].apply(translator.googletrans)
     print("Translate is ready now")
     words["taskid"] = words["word"].apply(polly.polly_tarea)
-    words["word"] = words["taskid"].apply(lambda x: polly.status(x, words["word"]))
+    words["funtion"] = words.apply(lambda x:  polly.status(x["taskid"], x["word"]), axis=1)
     print("Sound is ready now")
-    words.drop(["taskid"], axis=1)
     words = words[["word", "translate", "ipa"]]
     words.to_csv('data_clean.csv', index=False)
