@@ -12,7 +12,7 @@ def cleaner(ipa):
 def ipa_cmu(word_input):
     def palabra(word):
         palabra = engipa.ipa_list(word)
-        return palabra 
+        return palabra[0] 
 
     def frase(word):
         oracion = engipa.convert(word)
