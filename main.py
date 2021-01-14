@@ -7,8 +7,6 @@ if __name__ == "__main__":
     words = pd.read_csv("words_anki.csv")
     words.columns = ["word"]
     words["word"] = words["word"].apply(lambda x: x.lower())
-    words["word"].str.strip()
-    #words = words_no_clean["word"].drop_duplicates()
     print(words.size)
     words["ipa"] = words["word"].apply(ipa.ipa_cmu)
     print("IPAS is ready now")
