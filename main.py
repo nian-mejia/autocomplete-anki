@@ -4,7 +4,7 @@ import translator
 import polly
 
 if __name__ == "__main__":
-    words = pd.read_csv("words_anki.csv")
+    words = pd.read_csv("words_anki.csv", sep='\t')
     words.columns = ["word"]
     words["word"] = words["word"].apply(lambda x: x.lower())
     print(words.size)
