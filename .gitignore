@@ -2,3 +2,5 @@
 aws_key.yaml
 /sounds
 /env
+words_anki.csv
+data_clean.csv
